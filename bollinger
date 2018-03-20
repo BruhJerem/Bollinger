@@ -1,0 +1,159 @@
+#!/bin/python3
+import sys
+from math import sqrt
+from pathlib import Path
+from functools import reduce
+
+
+def aff_h_func():
+    _h = open("h_file.txt", "r")
+    _array = _h.read().split('\n')
+    for _line in _array:
+        print (_line)
+
+
+def isfloat(value):
+    try:
+        float(value)
+        return True
+
+    except ValueError:
+        return False
+
+
+def is_int(value):
+        try:
+            int(value)
+            return True
+
+        except ValueError:
+            return False
+
+
+def check_input():
+    _sd = sys.argv[2]
+    _index = sys.argv[4]
+    _period = sys.argv[1]
+    if not _period.isdigit():
+        print("Period must be digital")
+        exit(84)
+    if not _index.isdigit():
+        print("Index must be digital")
+        exit(84)
+    if int(_sd) < 0:
+        print("ERROR : {} Can't be negative".format(_sd))
+        exit(84)
+    if sys.argv[1] > sys.argv[4]:
+        print("Period can't be bigger than Index")
+        exit(84)
+
+
+def input_function():
+    print("INPUT")
+    print("Index:", sys.argv[4])
+    print("Period:", sys.argv[1])
+    print("SD_coef: %.2f" % float(sys.argv[2]))
+
+
+def ma_calculator(_arr):
+    _res = 0.0
+    _index = float(sys.argv[4])
+    _period = float(sys.argv[1])
+    for i in range(int(_index) + 1 - int(_period), int(_index) + 1):
+        _res += float(_arr[i])
+    return _res / _period
+
+
+def sd_calculator(_arr):
+    _res = 0.0
+    _index = float(sys.argv[4])
+    _period = float(sys.argv[1])
+    for i in range(int(_index) + 1 - int(_period), int(_index) + 1):
+        _res += (float(_arr[i]) - ma_calculator(_arr)) ** 2
+    square = (1 / _period) * _res
+    return sqrt(square)
+
+
+def bp_calculator(_arr):
+    _res = float(ma_calculator(_arr)) + float(sd_calculator(_arr) * float(sys.argv[2]))
+    return _res
+
+
+def bl_calculator(_arr):
+    _res = float(ma_calculator(_arr)) - float(sd_calculator(_arr) * float(sys.argv[2]))
+    return _res
+
+
+def output_func(_file, _arr):
+    print("\nOUTPUT")
+    print("MA: %.2f" % ma_calculator(_arr))
+    print("SD: %.2f" % sd_calculator(_arr))
+    print("B+: %.2f" % bp_calculator(_arr))
+    print("B-: %.2f" % bl_calculator(_arr))
+
+
+def get_arr_day(nb):
+    arr = []
+    a = 1
+    for i in range(nb):
+        arr.append(a)
+        a = a + 1
+    return arr
+
+
+def get_ma_for_arr(_arr):
+    _res = 0.0
+    _period = float(sys.argv[1])
+    _index = _period
+    arr = []
+    for i in range(int(_period)):
+        arr.append(0)
+    for j in range(int(_period), len(_arr)):
+        for i in range(int(_index) + 1 - int(_period), int(_index) + 1):
+            _res += float(_arr[i])
+        arr.append(round((_res / _period), 2))
+        _index += 1.0
+        _res = 0.0
+    return arr
+
+
+def main():
+    try:
+        if sys.argv[1] == "-h" and len(sys.argv) == 2:
+            aff_h_func()
+            exit(0)
+        elif len(sys.argv) == 5:
+            my_file = Path(sys.argv[3])
+            if not my_file.exists():
+                print("No such file : {}".format(sys.argv[3]))
+                exit(84)
+            input_function()
+            _file = open(sys.argv[3]).readlines()
+            _arr = []
+            for element in _file:
+                # if element == "\n":
+                #     continue
+                # if element.isalpha():
+                #     exit(84)
+
+                if float(element) < 0:
+                    print("ERROR: Negative value")
+                    exit(84)
+                _arr.append(float(element))
+            output_func(_file, _arr)
+        else:
+            print("ERROR : To much or not enough Argument")
+            exit(84)
+    except IOError as e:
+        print ("I/O error({}): {}".format(e.errno, e.strerror))
+        exit(84)
+    except ValueError:
+        print ("Could not convert data to an integer.")
+        exit(84)
+    except IndexError:
+        print("ERROR: List index out of range")
+        exit(84)
+
+
+if __name__ == '__main__':
+    main()
